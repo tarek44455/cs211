@@ -1,0 +1,95 @@
+
+
+#include <iostream>  // For input/output operations
+#include <string>    // For string manipulation
+#include <cctype>    // For character handling (isalpha, isdigit, isspace)
+
+using namespace std;  // Use standard namespace
+
+// Expression to analyze
+string expr = "num1 * (temp + 42) - result2";  
+string token;   // To store the current token
+char currentChar;   // To store the current character
+int currentClass;   // To store the current character type
+int currentPos = 0;  // Current position in 'expr'
+
+#define ID 1     // Identifier token type
+#define NUM 2    // Number token type
+#define OP 3     // Operator token type
+#define PAREN 4  // Parenthesis token type
+#define DONE -1  // End of input token type
+
+// Read the next character in the expression
+void readChar() {
+    if (currentPos < expr.length()) {
+        currentChar = expr[currentPos++];
+        if (isalpha(currentChar)) currentClass = ID;      // Check if it's a letter (Identifier)
+        else if (isdigit(currentChar)) currentClass = NUM; // Check if it's a digit (Number)
+        else if (currentChar == '(' || currentChar == ')') currentClass = PAREN; // Check for parentheses
+        else if (currentChar == '+' || currentChar == '-' || currentChar == '*' || currentChar == '/') currentClass = OP; // Check for operators
+        else currentClass = -2;  // Unknown character
+    } else {
+        currentClass = DONE;  // End of expression
+    }
+}
+
+// Skip any whitespace characters
+void skipSpaces() {
+    while (isspace(currentChar)) readChar();  // Continue reading characters until a non-space is found
+}
+
+// Scan the next token in the expression
+int scan() {
+    token.clear();  // Clear previous token
+    skipSpaces();   // Skip any spaces before the token
+
+    // Process the current character based on its type
+    switch (currentClass) {
+        case ID:  // If it's an identifier
+            while (isalnum(currentChar)) {  // Collect alphanumeric characters for identifier
+                token += currentChar;
+                readChar();
+            }
+            cout << "Token: IDENTIFIER, Lexeme: " << token << endl;
+            return ID;
+
+        case NUM:  // If it's a number
+            while (isdigit(currentChar)) {  // Collect digits for number
+                token += currentChar;
+                readChar();
+            }
+            cout << "Token: INTEGER, Lexeme: " << token << endl;
+            return NUM;
+
+        case OP:  // If it's an operator
+            token += currentChar;  // Add the operator to the token
+            cout << "Token: OPERATOR, Lexeme: " << token << endl;
+            readChar();
+            return OP;
+
+        case PAREN:  // If it's a parenthesis
+            token += currentChar;  // Add the parenthesis to the token
+            cout << "Token: PARENTHESIS, Lexeme: " << token << endl;
+            readChar();
+            return PAREN;
+
+        case DONE:  // If we've reached the end of the expression
+            cout << "End of expression." << endl;
+            return DONE;
+
+        default:  // If the character is unknown
+            cout << "Unknown character: " << currentChar << endl;
+            readChar();
+            return -1;  // Return error code for unknown character
+    }
+}
+
+int main() {
+    readChar();  // Initialize by reading the first character of the expression
+
+    // Scan the entire expression until DONE is returned
+    while (scan() != DONE);
+
+    return 0;  // End of program
+}
+
